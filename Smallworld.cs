@@ -24,10 +24,7 @@ namespace SmallWorldPhenomenon
                 for (int j = 1; j < s.Length; j++)
                     actors.Add(s[j]);
                 movie_name.Add(s[0]);
-                movie[s[0]] = actors;
-                Console.WriteLine(movie_name[movie_name.Count - 1]);
-                for(int j = 0; j < movie_name.Count - 1; j ++)
-                     Console.WriteLine(movie[movie_name[i]].);
+                movie[movie_name[movie_name.Count - 1]] = actors;
             }
 
         }
