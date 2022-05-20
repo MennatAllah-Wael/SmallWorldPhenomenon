@@ -139,7 +139,7 @@ namespace SmallWorldPhenomenon
                     s.Stop();
                     TimeSpan ts = s.Elapsed;
                     Console.WriteLine("Time taken : " + ts);
-                    s = new Stopwatch();
+                    /*s = new Stopwatch();
                     s.Start();
                     queries = "Testcases\\Complete\\large\\queries600.txt";
                     Console.WriteLine("Case (600 queries): ");
@@ -147,6 +147,7 @@ namespace SmallWorldPhenomenon
                     s.Stop();
                     ts = s.Elapsed;
                     Console.WriteLine("Time taken : " + ts);
+                    */
                 }
                 else if (choice2 == '4')
                 {

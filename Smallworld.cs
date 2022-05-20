@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 
 namespace SmallWorldPhenomenon
@@ -38,7 +39,6 @@ namespace SmallWorldPhenomenon
         }
         public static void read_movies(string path)
         {
-            //Console.WriteLine("read movies");
             //split on /  [0] movie name    [:] actors
             List<string> movie_name = new List<string>();
             string text = File.ReadAllText(path);
@@ -48,34 +48,30 @@ namespace SmallWorldPhenomenon
                 string[] s = lineItems[i].Split('/');
                 List<string> actors = new List<string>();
                 for (int j = 1; j < s.Length; j++)
+                {
                     actors.Add(s[j]);
+                    adj[s[j]] = new List<string>();
+                }
                 movie_name.Add(s[0]);
                 movie[movie_name[movie_name.Count - 1]] = actors;
             }
-            //Console.WriteLine("end movies");
+            
             graph();
         }
         public static void graph()
         {
             foreach (string movie_name in movie.Keys)
-                foreach (string actor1 in movie[movie_name])
-                    adj[actor1] = new List<string>();
-
-            foreach (string movie_name in movie.Keys)
             {
-                List<string> actors = new List<string>(movie[movie_name]);
-                foreach (string actor1 in actors)
+                foreach (string actor1 in movie[movie_name])
                 { 
-                    foreach (string actor2 in actors)
+                    foreach (string actor2 in movie[movie_name])
                     {
                         KeyValuePair<string, string> pair = new KeyValuePair<string, string>(actor1, actor2);
-                        if (!chain.ContainsKey(pair)) 
-                            chain[pair] = new List<string>();
                         if (actor1 != actor2)
                         {
+                            chain[pair] = new List<string>();
                             if (adj[actor1].Contains(actor2))
                             {
-                                //Console.WriteLine("found actor " + actor2);
                                 chain[pair].Add(movie_name);
                                 relation[pair]++;
                             }
@@ -90,7 +86,6 @@ namespace SmallWorldPhenomenon
                 }
             }
         }
-
         public static void BFS(string source, string dist)
         {
             Dictionary<string, List<string>> parent = new Dictionary<string, List<string>>();//key = child, value = parent
@@ -171,7 +166,7 @@ namespace SmallWorldPhenomenon
         }
         public static void execute(List<KeyValuePair<string, string>> queiry)
         {
-            foreach(KeyValuePair<string, string> pair in queiry)
+            foreach (KeyValuePair<string, string> pair in queiry)
             {
                 Console.WriteLine(pair.Key + '/' + pair.Value);
                 BFS(pair.Key, pair.Value);
