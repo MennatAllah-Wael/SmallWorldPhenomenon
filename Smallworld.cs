@@ -11,11 +11,10 @@ namespace SmallWorldPhenomenon
 {
     class Smallworld
     {
-        public static Dictionary<string, List<string>> movie = new Dictionary<string, List<string>>();//movie name, list of actors
-        public static Dictionary<string, List<string>> adj = new Dictionary<string, List<string>>();//actor name, list of adjacent actors
-        public static Dictionary<KeyValuePair<string, string>, int> relation = new Dictionary<KeyValuePair<string, string>, int>();//pair<actor, actor>, no of common movies
+        public static Dictionary<string, Dictionary<string , int>> adj = new Dictionary<string, Dictionary<string, int>>();//actor name, list of adjacent actors + their relation strength
         public static Dictionary<KeyValuePair<string, string>, List<string>> chain = new Dictionary<KeyValuePair<string, string>, List<string>>();//pair<actor, actor>,common movies names
-        public static List<string> actors = new List<string>();
+        //public static Dictionary<string, int> encodedActors = new Dictionary<string, int>();
+        //public static Dictionary<int, string> reverse_encodedActors = new Dictionary<int, string>();
         public static List<KeyValuePair<string, string>> read_quiries(string path, bool sample)
         {
             string text = File.ReadAllText(path);
@@ -40,47 +39,30 @@ namespace SmallWorldPhenomenon
         public static void read_movies(string path)
         {
             //split on /  [0] movie name    [:] actors
-            List<string> movie_name = new List<string>();
+            string movie_name = "";
             string text = File.ReadAllText(path);
             string[] lineItems = text.Split('\n');
             for (int i = 0; i < lineItems.Length; i++)
             {
+                //Console.WriteLine(i);
                 string[] s = lineItems[i].Split('/');
-                List<string> actors = new List<string>();
+                movie_name = s[0];
                 for (int j = 1; j < s.Length; j++)
                 {
-                    actors.Add(s[j]);
-                    adj[s[j]] = new List<string>();
-                }
-                movie_name.Add(s[0]);
-                movie[movie_name[movie_name.Count - 1]] = actors;
-            }
-            
-            graph();
-        }
-        public static void graph()
-        {
-            foreach (string movie_name in movie.Keys)
-            {
-                foreach (string actor1 in movie[movie_name])
-                { 
-                    foreach (string actor2 in movie[movie_name])
+                    if (!adj.ContainsKey(s[j]))
+                        adj[s[j]] = new Dictionary<string, int>();
+                    for (int jj = 1; jj < s.Length; jj++)
                     {
-                        KeyValuePair<string, string> pair = new KeyValuePair<string, string>(actor1, actor2);
-                        if (actor1 != actor2)
+                        if (j != jj)
                         {
-                            chain[pair] = new List<string>();
-                            if (adj[actor1].Contains(actor2))
-                            {
-                                chain[pair].Add(movie_name);
-                                relation[pair]++;
-                            }
+                            KeyValuePair<string, string> pair = new KeyValuePair<string, string>(s[j], s[jj]);
+                            if (!chain.ContainsKey(pair))
+                                chain[pair] = new List<string>();
+                            chain[pair].Add(movie_name);
+                            if (!adj[s[j]].ContainsKey(s[jj]))
+                                adj[s[j]][s[jj]] = 1;
                             else
-                            {
-                                adj[actor1].Add(actor2);
-                                chain[pair].Add(movie_name);
-                                relation[pair] = 1;
-                            }
+                                adj[s[j]][s[jj]]++;
                         }
                     }
                 }
@@ -92,6 +74,7 @@ namespace SmallWorldPhenomenon
             Dictionary<string, char> color = new Dictionary<string, char>();
             Dictionary<string, int> relation_strength = new Dictionary<string, int>();
             Dictionary<string, int> degree = new Dictionary<string, int>();
+            List<string> parent_hold = new List<string>();
             Queue<string> q = new Queue<string>();
             q.Enqueue(source);
             //initialize the parents list for evry actor
@@ -100,6 +83,7 @@ namespace SmallWorldPhenomenon
             {
                 parent[child] = new List<string>();
                 color[child] = 'w';
+                relation_strength[child] = 0;
             }
             color[source] = 'g';
             degree[source] = 0;
@@ -111,12 +95,13 @@ namespace SmallWorldPhenomenon
                 u = q.Dequeue();
                 if (u == dist)
                     break;
-                foreach (string i in adj[u])
+                foreach (string i in adj[u].Keys)
                 {
                     if (color[i] == 'w')
                     {
                         KeyValuePair<string, string> pair = new KeyValuePair<string, string>(u, i);
-                        relation_strength[i] = relation_strength[u] + relation[pair];
+                        if (relation_strength[u] + adj[u][i] >= relation_strength[i])
+                            relation_strength[i] = relation_strength[u] + adj[u][i];
                         color[i] = 'g';
                         degree[i] = degree[u] + 1;
                         parent[i].Add(u);
@@ -127,7 +112,6 @@ namespace SmallWorldPhenomenon
             }
             string v = dist;
             u = source;
-            List<string> parent_hold = new List<string>();
             parent_hold.Add(dist);
 
             while (v != u)
@@ -163,6 +147,7 @@ namespace SmallWorldPhenomenon
                 else
                     Console.Write(chain[pair][0] + " => ");
             }
+            Console.WriteLine();
         }
         public static void execute(List<KeyValuePair<string, string>> queiry)
         {
