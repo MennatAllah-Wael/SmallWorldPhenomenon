@@ -11,10 +11,8 @@ namespace SmallWorldPhenomenon
 {
     class Smallworld
     {
-        public static Dictionary<string, Dictionary<string , int>> adj = new Dictionary<string, Dictionary<string, int>>();//actor name, list of adjacent actors + their relation strength
-        public static Dictionary<KeyValuePair<string, string>, List<string>> chain = new Dictionary<KeyValuePair<string, string>, List<string>>();//pair<actor, actor>,common movies names
-        //public static Dictionary<string, int> encodedActors = new Dictionary<string, int>();
-        //public static Dictionary<int, string> reverse_encodedActors = new Dictionary<int, string>();
+        public static Dictionary<string, Dictionary<string, int>> adj = new Dictionary<string, Dictionary<string, int>>();//actor name, list of adjacent actors + their relation strength
+        public static Dictionary<KeyValuePair<string, string>, string> chain = new Dictionary<KeyValuePair<string, string>, string>();//pair<actor, actor>,common movies names
         public static List<KeyValuePair<string, string>> read_quiries(string path, bool sample)
         {
             string text = File.ReadAllText(path);
@@ -56,13 +54,13 @@ namespace SmallWorldPhenomenon
                         if (j != jj)
                         {
                             KeyValuePair<string, string> pair = new KeyValuePair<string, string>(s[j], s[jj]);
-                            if (!chain.ContainsKey(pair))
-                                chain[pair] = new List<string>();
-                            chain[pair].Add(movie_name);
+                            //if (!chain.ContainsKey(pair))
+                            //    chain[pair] = new List<string>();
                             if (!adj[s[j]].ContainsKey(s[jj]))
                                 adj[s[j]][s[jj]] = 1;
                             else
                                 adj[s[j]][s[jj]]++;
+                            chain[pair] = movie_name;
                         }
                     }
                 }
@@ -138,14 +136,14 @@ namespace SmallWorldPhenomenon
                 else
                     Console.Write(parent_hold[i] + " -> ");
             }
-            Console.Write("CHAIN OF MOVIES:  ");
+            Console.Write("CHAIN OF MOVIES: ");
             for (int i = parent_hold.Count - 1; i > 0; i--)
             {
                 KeyValuePair<string, string> pair = new KeyValuePair<string, string>(parent_hold[i], parent_hold[i - 1]);
                 if (i == 1)
-                    Console.WriteLine(chain[pair][0]);
+                    Console.WriteLine(chain[pair]);
                 else
-                    Console.Write(chain[pair][0] + " => ");
+                    Console.Write(chain[pair] + " => ");
             }
             Console.WriteLine();
         }
